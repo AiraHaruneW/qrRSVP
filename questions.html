@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wedding RSVP</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fffaf6;
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      .form-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 2rem 1rem;
+        width: 100%;
+        max-width: 420px;
+        margin-top: 2rem;
+      }
+
+      h2 {
+        text-align: center;
+        color: #8e1c25;
+        margin-bottom: 1rem;
+      }
+
+      .form-wrapper {
+        background: white;
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 100%;
+      }
+
+      .question {
+        display: none;
+        animation: fade 0.3s ease-in-out;
+      }
+
+      .question.active {
+        display: block;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+        color: #8e1c25;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 0.6rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-size: 1rem;
+      }
+
+      input:focus {
+        scroll-margin-top: 100px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 1rem;
+      }
+
+      button {
+        background: #ff6f61;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        flex: 1;
+      }
+
+      .thank-you {
+        text-align: center;
+        color: green;
+        font-size: 1.1rem;
+        display: none;
+        margin-top: 1rem;
+      }
+
+      .not-android {
+        font-size: 1rem;
+        color: #555;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-height: 500px) {
+        .form-wrapper {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="androidContent" class="form-container" style="display: none">
+      <h2>Wedding RSVP</h2>
+      <div class="form-wrapper">
+        <form id="rsvpForm" onsubmit="handleSubmit(event)">
+          <div class="question active" id="q1">
+            <label for="name">Your Name</label>
+            <input id="name" name="name" type="text" required />
+            <div class="button-group">
+              <button type="button" onclick="next(1)">Next</button>
+            </div>
+          </div>
+
+          <div class="question" id="q2">
+            <label for="phone">Phone Number</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              pattern="[0-9]{10}"
+              required
+              placeholder="10-digit number"
+            />
+            <div class="button-group">
+              <button type="button" onclick="prev(2)">Back</button>
+              <button type="button" onclick="next(2)">Next</button>
+            </div>
+          </div>
+
+          <div class="question" id="q3">
+            <label>Will you attend?</label>
+            <select id="attendance" name="attendance" required>
+              <option value="">Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+            <div class="button-group">
+              <button type="button" onclick="prev(3)">Back</button>
+              <button type="button" onclick="next(3)">Next</button>
+            </div>
+          </div>
+
+          <div class="question" id="q4">
+            <label>How many guests?</label>
+            <input id="guests" name="guests" type="number" min="0" required />
+            <div class="button-group">
+              <button type="button" onclick="prev(4)">Back</button>
+              <button type="button" onclick="next(4)">Next</button>
+            </div>
+          </div>
+
+          <div class="question" id="q5">
+            <label>Message for the Couple</label>
+            <input
+              id="message"
+              name="message"
+              type="text"
+              placeholder="Optional"
+            />
+            <div class="button-group">
+              <button type="button" onclick="prev(5)">Back</button>
+              <button type="submit">Submit</button>
+            </div>
+          </div>
+        </form>
+        <div class="thank-you" id="thankYou">
+          🎉 Thank you! Your RSVP is recorded.
+        </div>
+      </div>
+    </div>
+
+    <div id="nonAndroidMessage" class="not-android" style="display: none">
+      This RSVP form is only available on Android devices.
+    </div>
+
+    <script>
+      function next(step) {
+        const currentStep = document.getElementById(`q${step}`);
+        const input = currentStep.querySelector("input, select");
+
+        if (input && input.required && !input.value.trim()) {
+          input.style.border = "2px solid red";
+          input.focus();
+          return;
+        } else if (input && input.type === "tel" && !input.checkValidity()) {
+          input.style.border = "2px solid red";
+          input.focus();
+          return;
+        } else if (input) {
+          input.style.border = "1px solid #ccc";
+        }
+
+        currentStep.classList.remove("active");
+        document.getElementById(`q${step + 1}`).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function prev(step) {
+        document.getElementById(`q${step}`).classList.remove("active");
+        document.getElementById(`q${step - 1}`).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        document.getElementById("rsvpForm").style.display = "none";
+        document.getElementById("thankYou").style.display = "block";
+      }
+
+      // Smooth scroll into view when keyboard opens
+      document.querySelectorAll("input, select").forEach((el) => {
+        el.addEventListener("focus", () => {
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300);
+        });
+      });
+
+      window.onload = function () {
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        if (isAndroid) {
+          document.getElementById("androidContent").style.display = "flex";
+        } else {
+          document.getElementById("nonAndroidMessage").style.display = "block";
+        }
+      };
+    </script>
+  </body>
+</html>

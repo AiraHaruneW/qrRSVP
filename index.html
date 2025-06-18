@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Envelope Stack</title>
+    <style>
+      * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-focus-ring-color: transparent;
+        outline: none;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #e0e0e0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .android-device {
+        width: 100%;
+        height: 100%;
+        background: rgb(255, 255, 255);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .app-screen {
+        width: 100vw;
+        height: 100vh;
+        background: rgb(252, 254, 255);
+        padding: 16px;
+        padding-top: 50px;
+        box-sizing: border-box;
+        position: relative;
+        perspective: 1000px;
+        perspective-origin: center;
+      }
+
+      @media (min-width: 600px) {
+        .app-screen {
+          width: 360px;
+          height: 720px;
+          border-radius: 20px;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      .envelope-animator {
+        width: 100%;
+        padding-top: 100%;
+        position: relative;
+
+        transform-style: preserve-3d;
+        animation: popout 2s ease-in-out forwards,
+          jiggle 1.5s ease 1.3s infinite;
+      }
+
+      .envelope-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      @keyframes popout {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes jiggle {
+        0% {
+          transform: rotateZ(0deg);
+        }
+
+        10% {
+          transform: rotateZ(5deg);
+        }
+
+        20% {
+          transform: rotateZ(-5deg);
+        }
+
+        30% {
+          transform: rotateZ(2deg);
+        }
+
+        40% {
+          transform: rotateZ(-2deg);
+        }
+
+        50% {
+          transform: rotateZ(1deg);
+        }
+
+        60% {
+          transform: rotateZ(-1deg);
+        }
+
+        70% {
+          transform: rotateZ(0deg);
+        }
+
+        100% {
+          transform: rotateZ(0deg);
+        }
+      }
+
+      .envelope-layer {
+        position: absolute;
+        top: 10%;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .envelopBody {
+        z-index: 1;
+        transform: scale(0.95) translateY(22%);
+      }
+
+      .envelopCd {
+        z-index: 2;
+        transform: scale(0.5) translateY(20%);
+      }
+
+      .envelopForeground {
+        z-index: 3;
+        transform: scale(0.8) translateY(-5%);
+      }
+
+      .envelope-wrapper,
+      .envelope-layer {
+        overflow: visible;
+      }
+
+      .envelopTopfold {
+        z-index: 5;
+        width: 100%;
+        height: 40%;
+        background: linear-gradient(to bottom, #ffffff 10%, #c3c7cb 130%);
+        clip-path: polygon(100% 0%, 50% 100%, 0% 0%);
+        transform: scale(0.8) translateY(104%);
+        transform-origin: top;
+        border-top: solid rgba(163, 163, 163, 0.236) 2px;
+      }
+
+      .logoStamp {
+        z-index: 5;
+        transform: scale(0.25) translateY(50%);
+      }
+
+      object {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .stop-jiggle {
+        animation: popout 1s ease-in-out forwards;
+      }
+
+      @keyframes stamp-pop {
+        0% {
+          transform: scale(0.25) translateY(50%);
+          opacity: 1;
+        }
+
+        40% {
+          transform: scale(0.2) translateY(50%);
+          opacity: 1;
+        }
+
+        100% {
+          transform: scale(0.5) translateY(50%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes shrink {
+        0% {
+          transform: scale(1);
+        }
+
+        9% {
+          transform: scale(0.6);
+        }
+
+        15% {
+          transform: scale(0.8);
+        }
+
+        65% {
+          transform: scale(0.8);
+        }
+
+        100% {
+          transform: scale(0.2);
+        }
+      }
+
+      @keyframes reveal {
+        0% {
+          transform: scale(0.8) translateY(104%) rotateX(0deg);
+          background: linear-gradient(to bottom, #ffffff 10%, #c3c7cb 130%);
+        }
+
+        100% {
+          transform: scale(0.8) translateY(104%) rotateX(-180deg);
+          background: linear-gradient(to bottom, #e6e8ea 0%, #dde0e3 100%);
+          border: none;
+          z-index: 1;
+        }
+      }
+
+      @keyframes cd-popup {
+        0% {
+          z-index: 2;
+          transform: scale(0.5) translateY(20%);
+        }
+
+        20% {
+          z-index: 4;
+          transform: scale(0.5) translateY(-50%);
+        }
+
+        60% {
+          z-index: 4;
+          transform: scale(0.5) translateY(20%);
+          opacity: 1;
+        }
+
+        80% {
+          opacity: 1;
+        }
+
+        100% {
+          z-index: 4;
+          transform: scale(5.5) translateY(20%) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      .all-shrink {
+        animation: shrink 1.5s ease-in forwards;
+      }
+
+      .stamp-animate {
+        animation: stamp-pop 0.6s ease-out forwards;
+      }
+
+      .open-envelop {
+        animation: reveal 0.6s ease 0.3s forwards;
+      }
+
+      .cd-popout {
+        animation: cd-popup 2s ease-in-out 0.6s forwards;
+      }
+
+      .hide-envelope-elements .envelopBody,
+      .hide-envelope-elements .envelopTopfold,
+      .hide-envelope-elements .envelopForeground,
+      .hide-envelope-elements .logoStamp {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+      }
+
+      .invite-header {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .invite-title {
+        font-size: 1.3rem;
+        color: #8e1c25;
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .invite-guide {
+        font-size: 0.95rem;
+        color: #555;
+        margin: 5px 0 10px;
+      }
+
+      .decor {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+      }
+
+      #inviteVideo {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+
+      .videoCd {
+        transform: scale(0.6);
+        pointer-events: auto;
+        transform-origin: center;
+      }
+
+      .rsvp-box {
+        background: #fff;
+        max-width: 500px;
+        padding: 2rem;
+        padding-top: 0;
+        text-align: center;
+      }
+
+      .rsvp-box p {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+
+      .rsvp-deadline {
+        font-weight: bold;
+        color: #d35400;
+      }
+
+      .rsvp-container {
+        display: none;
+        /* 🔒 hidden initially */
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .start-button {
+        margin-top: 1rem;
+        background-color: #ff6f61;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 30px;
+        font-size: 1rem;
+        color: white;
+      }
+
+      .cd-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+
+      .cd-wrapper object {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.6);
+        font-size: 2.5rem;
+        color: black;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+
+        /* So it doesn’t interfere with clicks */
+      }
+
+      @keyframes fade-away {
+        0% {
+          opacity: 1;
+        }
+
+        10% {
+          opacity: 0;
+        }
+
+        90% {
+          opacity: 0;
+        }
+
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes play-video {
+        0% {
+          scale: 0.6;
+          transform: rotate(0deg);
+          opacity: 1;
+        }
+
+        25% {
+          scale: 0.4;
+          opacity: 1;
+        }
+
+        50% {
+          scale: 1;
+          transform: rotate(720deg);
+          opacity: 0;
+        }
+
+        90% {
+          opacity: 0;
+        }
+
+        100% {
+          opacity: 1;
+          scale: 0.6;
+          transform: rotate(0deg);
+        }
+      }
+
+      .icon-motion {
+        animation: fade-away 1.5s ease-in forwards;
+      }
+
+      .cd-motion {
+        animation: play-video 1.5s ease-in-out forwards;
+      }
+
+      .alert-box {
+        position: absolute;
+        width: 91%;
+        height: 45%;
+        background-color: #ffffff;
+        z-index: 10;
+        border-radius: 5%;
+        text-align: center;
+        padding-top: 8%;
+        box-shadow: 4px 4px 20px 1px rgba(0, 0, 0, 0.25);
+        display: none;
+      }
+      .transparentBg {
+        background-color: #ffffff00;
+      }
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #555;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      .alert-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(6px); /* the actual blur */
+        background-color: rgba(0, 0, 0, 0.3); /* dimmed background */
+        z-index: 9;
+        display: none;
+      }
+      .animated-close {
+        animation: fadeOutDown 0.4s ease forwards;
+      }
+
+      .fade-opacity {
+        animation: fadeOut 0.4s ease forwards;
+      }
+
+      @keyframes fadeOutDown {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="android-device">
+      <div class="app-screen">
+        <div class="invite-header">
+          <div class="decor">🌸🌿💌🌿🌸</div>
+          <h1 class="invite-title">You're Invited</h1>
+          <p class="invite-guide">Tap the envelope to open</p>
+        </div>
+        <div class="alert-backdrop"></div>
+        <div class="alert-box">
+          <span class="close-btn" onclick="closeAlert()">×</span>
+          <div class="decor">🌸🌿💌🌿🌸</div>
+          <h1 class="invite-title">You're Invited</h1>
+          <div class="rsvp-box transparentBg">
+            <p>
+              The joy begins soon — join us!<br />
+              Just a few fun questions to RSVP!
+            </p>
+            <p class="rsvp-deadline">
+              🎯 RSVP by: June 25, 2025<br />
+              <small>(Help us plan the magic!)</small>
+            </p>
+            <button class="start-button" onclick="playButtonSound()">
+              👇 Just a few quick steps!
+            </button>
+          </div>
+        </div>
+        <video id="inviteVideo" controls>
+          <source src="video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        <div class="rsvp-container">
+          <div class="videoCd" onclick="startCD()">
+            <div class="cd-wrapper">
+              <object
+                type="image/svg+xml"
+                data="assets/envelop/cd.svg"
+              ></object>
+              <div class="play-icon">
+                <object type="image/svg+xml" data="assets/play.svg"></object>
+              </div>
+              <!-- Unicode Play symbol -->
+              <div
+                class="click-overlay"
+                style="
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                "
+              ></div>
+            </div>
+          </div>
+
+          <div class="rsvp-box">
+            <p>
+              The joy begins soon — join us!<br />
+              Just a few fun questions to RSVP!
+            </p>
+            <p class="rsvp-deadline">
+              🎯 RSVP by: June 25, 2025<br />
+              <small>(Help us plan the magic!)</small>
+            </p>
+            <button class="start-button" onclick="playButtonSound()">
+              👇 Just a few quick steps!
+            </button>
+          </div>
+        </div>
+
+        <div class="envelope-animator" onclick="stopJiggle(this)">
+          <div class="envelope-wrapper">
+            <div class="envelope-layer envelopBody">
+              <object
+                type="image/svg+xml"
+                data="assets/envelop/Subtract.svg"
+              ></object>
+            </div>
+            <div class="envelope-layer envelopCd">
+              <object
+                type="image/svg+xml"
+                data="assets/envelop/cd.svg"
+              ></object>
+            </div>
+            <div class="envelope-layer envelopForeground">
+              <object
+                type="image/svg+xml"
+                data="assets/envelop/foreground.svg"
+              ></object>
+            </div>
+            <div class="envelope-layer envelopTopfold"></div>
+            <div class="envelope-layer logoStamp" id="stamp">
+              <object
+                type="image/svg+xml"
+                data="assets/envelop/logoStamp.svg"
+              ></object>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <audio id="audio1" src="audio/tapping.mp3" preload="auto"></audio>
+    <audio id="audio2" src="audio/paper.mp3" preload="auto"></audio>
+    <audio id="audio3" src="audio/first.mp3" preload="auto"></audio>
+    <audio id="audio4" src="audio/last.mp3" preload="auto"></audio>
+
+    <script>
+      const audio1 = document.getElementById("audio1");
+      const audio3 = document.getElementById("audio3"); // envelope pop
+      const audio4 = document.getElementById("audio4"); // transition so
+      function playButtonSound() {
+        audio1.currentTime = 0;
+        audio1.play();
+
+        // Wait for audio to finish OR use a short delay (e.g. 700ms)
+        setTimeout(() => {
+          window.location.href = "questions.html";
+        }, 300); // Adjust time to match audio length
+      }
+      function closeAlert() {
+        audio1.currentTime = 0;
+        audio1.muted = false;
+        audio1.play().catch((e) => {
+          console.warn("Audio play failed:", e);
+        });
+        const alertBox = document.querySelector(".alert-box");
+        const alertBackdrop = document.querySelector(".alert-backdrop");
+
+        alertBox.classList.add("animated-close");
+        alertBackdrop.classList.add("fade-opacity");
+
+        // Remove elements after animation ends
+        alertBox.addEventListener("animationend", () => {
+          alertBox.remove();
+        });
+
+        alertBackdrop.addEventListener("animationend", () => {
+          alertBackdrop.remove();
+        });
+      }
+
+      const video = document.getElementById("inviteVideo");
+      function showAndPlayVideo() {
+        video.play();
+        video.style.display = "block";
+        if (video.requestFullscreen) video.requestFullscreen();
+        else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
+        else if (video.msRequestFullscreen) video.msRequestFullscreen();
+      }
+
+      function startCD() {
+        audio1.currentTime = 0;
+        audio1.muted = false;
+        audio1.play().catch((e) => {
+          console.warn("Audio play failed:", e);
+        });
+        audio3.currentTime = 0;
+        audio3.muted = false;
+        audio3.play().catch((e) => {
+          console.warn("Audio play failed:", e);
+        });
+        setTimeout(() => {
+          audio4.currentTime = 0;
+          audio4.play();
+        }, 200);
+        const cd = document.querySelector(".videoCd");
+        const icon = document.querySelector(".play-icon");
+        cd.classList.remove("cd-motion");
+        icon.classList.remove("icon-motion");
+
+        // Force reflow to allow re-adding the animation class
+        void cd.offsetWidth;
+        void icon.offsetWidth;
+
+        cd.classList.add("cd-motion");
+        icon.classList.add("icon-motion");
+
+        cd.classList.add("cd-motion");
+        icon.classList.add("icon-motion");
+
+        setTimeout(() => {
+          showAndPlayVideo(); // ✅ same play logic, now shared
+        }, 950);
+      }
+
+      function showRSVP() {
+        document.querySelector(".rsvp-container").style.display = "flex";
+        document.querySelector(".invite-guide").textContent =
+          "Tap the Icon to Re-play";
+        document.querySelector(".alert-box").style.display = "block";
+        document.querySelector(".alert-backdrop").style.display = "block";
+      }
+
+      function stopJiggle(el) {
+        const audio2 = document.getElementById("audio2"); // paper open
+
+        audio1.currentTime = 0;
+        audio1.muted = false;
+        audio1.play().catch((e) => {
+          console.warn("Audio play failed:", e);
+        });
+        setTimeout(() => {
+          audio2.currentTime = 0;
+          audio2.play();
+        }, 300);
+
+        // Play audio3 after 1300ms
+        setTimeout(() => {
+          audio3.currentTime = 0;
+          audio3.play();
+        }, 1000);
+
+        // Play audio4 after 2800ms (matches showAndPlayVideo)
+        setTimeout(() => {
+          audio4.currentTime = 0;
+          audio4.play();
+        }, 1800);
+        el.classList.add("stop-jiggle");
+        const stamp = document.getElementById("stamp");
+        stamp.classList.add("stamp-animate");
+        el.classList.add("all-shrink");
+        document.querySelector(".envelopTopfold").classList.add("open-envelop");
+        document.querySelector(".envelopCd").classList.add("cd-popout");
+        setTimeout(() => {
+          document
+            .querySelector(".envelope-wrapper")
+            .classList.add("hide-envelope-elements");
+        }, 1300);
+
+        setTimeout(() => {
+          showAndPlayVideo();
+        }, 2800);
+      }
+
+      video.addEventListener("ended", () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        video.pause();
+        video.currentTime = 0;
+        video.style.display = "none";
+        showRSVP();
+      });
+
+      [
+        "fullscreenchange",
+        "webkitfullscreenchange",
+        "mozfullscreenchange",
+        "MSFullscreenChange",
+      ].forEach((evt) => {
+        document.addEventListener(evt, () => {
+          if (
+            !document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement &&
+            !document.msFullscreenElement
+          ) {
+            video.pause();
+            video.currentTime = 0;
+            video.style.display = "none";
+            const envelope = document.querySelector(".envelope-animator");
+            if (envelope) envelope.remove();
+            showRSVP();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
