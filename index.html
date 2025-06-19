@@ -605,18 +605,36 @@
     <audio id="audio4" src="audio/last.mp3" preload="auto"></audio>
 
     <script>
+      // ✅ Fix: Preload & decode audio on first touch for Android browsers
+      document.addEventListener(
+        "touchstart",
+        () => {
+          [audio1, audio2, audio3, audio4].forEach((a) => {
+            a.play()
+              .then(() => {
+                a.pause();
+                a.currentTime = 0;
+              })
+              .catch((e) => {
+                console.log("Preloading audio failed (expected):", e);
+              });
+          });
+        },
+        { once: true }
+      );
+
       const audio1 = document.getElementById("audio1");
       const audio3 = document.getElementById("audio3"); // envelope pop
       const audio4 = document.getElementById("audio4"); // transition so
+
       function playButtonSound() {
         audio1.currentTime = 0;
         audio1.play();
-
-        // Wait for audio to finish OR use a short delay (e.g. 700ms)
         setTimeout(() => {
           window.location.href = "questions.html";
-        }, 300); // Adjust time to match audio length
+        }, 300);
       }
+
       function closeAlert() {
         audio1.currentTime = 0;
         audio1.muted = false;
@@ -629,7 +647,6 @@
         alertBox.classList.add("animated-close");
         alertBackdrop.classList.add("fade-opacity");
 
-        // Remove elements after animation ends
         alertBox.addEventListener("animationend", () => {
           alertBox.remove();
         });
@@ -640,6 +657,7 @@
       }
 
       const video = document.getElementById("inviteVideo");
+
       function showAndPlayVideo() {
         video.play();
         video.style.display = "block";
@@ -667,19 +685,13 @@
         const icon = document.querySelector(".play-icon");
         cd.classList.remove("cd-motion");
         icon.classList.remove("icon-motion");
-
-        // Force reflow to allow re-adding the animation class
         void cd.offsetWidth;
         void icon.offsetWidth;
-
-        cd.classList.add("cd-motion");
-        icon.classList.add("icon-motion");
-
         cd.classList.add("cd-motion");
         icon.classList.add("icon-motion");
 
         setTimeout(() => {
-          showAndPlayVideo(); // ✅ same play logic, now shared
+          showAndPlayVideo();
         }, 950);
       }
 
@@ -692,7 +704,7 @@
       }
 
       function stopJiggle(el) {
-        const audio2 = document.getElementById("audio2"); // paper open
+        const audio2 = document.getElementById("audio2");
 
         audio1.currentTime = 0;
         audio1.muted = false;
@@ -703,14 +715,10 @@
           audio2.currentTime = 0;
           audio2.play();
         }, 300);
-
-        // Play audio3 after 1300ms
         setTimeout(() => {
           audio3.currentTime = 0;
           audio3.play();
         }, 1000);
-
-        // Play audio4 after 2800ms (matches showAndPlayVideo)
         setTimeout(() => {
           audio4.currentTime = 0;
           audio4.play();
@@ -726,7 +734,6 @@
             .querySelector(".envelope-wrapper")
             .classList.add("hide-envelope-elements");
         }, 1300);
-
         setTimeout(() => {
           showAndPlayVideo();
         }, 2800);
